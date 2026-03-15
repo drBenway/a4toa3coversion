@@ -72,3 +72,13 @@ test('renderBookletPdf creates A3 landscape output pages', async () => {
   assert.equal(Math.round(sheetSize.height), Math.round(841.89));
 });
 
+test('renderBookletPdf reports a readable error for malformed input PDFs', async () => {
+  await assert.rejects(
+    () => renderBookletPdf({
+      inputBytes: Buffer.from('not-a-pdf'),
+      signatureSheets: 2,
+    }),
+    /Failed to read input PDF:/,
+  );
+});
+

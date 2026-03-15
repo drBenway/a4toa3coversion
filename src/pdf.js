@@ -2,6 +2,38 @@ import { PDFDocument } from 'pdf-lib';
 
 import { buildBookletPlan, flattenSides } from './imposition.js';
 
+function isFlateHeaderError(error) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes('invalid header in flate stream') || message.includes('invalid header in flat stream');
+}
+
+async function loadSourcePdf(inputBytes) {
+  try {
+    return await PDFDocument.load(inputBytes);
+  } catch (strictError) {
+    try {
+      // Retry with tolerant parsing for PDFs that have partially malformed objects.
+      return await PDFDocument.load(inputBytes, {
+        throwOnInvalidObject: false,
+      });
+    } catch (tolerantError) {
+      if (isFlateHeaderError(tolerantError) || isFlateHeaderError(strictError)) {
+        throw new Error(
+          'Failed to read input PDF: invalid compressed stream header. The file is likely malformed. Try re-saving/exporting the PDF (or repairing it with qpdf/Ghostscript) and run again.',
+          { cause: tolerantError },
+        );
+      }
+
+      const message = tolerantError instanceof Error ? tolerantError.message : String(tolerantError);
+      throw new Error(`Failed to read input PDF: ${message}`, { cause: tolerantError });
+    }
+  }
+}
+
 function getPortraitDimensions(page) {
   const { width, height } = page.getSize();
 
@@ -64,7 +96,7 @@ export async function renderBookletPdf(options) {
     throw new Error('inputBytes is required.');
   }
 
-  const sourcePdf = await PDFDocument.load(inputBytes);
+  const sourcePdf = await loadSourcePdf(inputBytes);
   const totalPages = sourcePdf.getPageCount();
 
   if (totalPages === 0) {

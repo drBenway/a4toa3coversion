@@ -76,6 +76,21 @@ node ./src/cli.js --input ./sample-input.pdf --output ./sample-booklet.pdf
 - For duplex printing, you will usually want your printer set to **short-edge flip**.
 - When the document is longer than one signature, the output keeps signatures separate in order: signature 1, then signature 2, and so on.
 
+## Troubleshooting
+
+If you see an error like `invalid header in flate stream` (or `flat stream`), the input PDF likely contains malformed compressed objects.
+
+Try one of these fixes, then run the command again:
+
+- Re-save/export the PDF from the source app (Adobe Acrobat, Preview, browser print dialog, etc.).
+- Repair and rewrite the PDF with a tool like `qpdf`:
+
+```bash
+qpdf --linearize ./input.pdf ./input-repaired.pdf
+```
+
+- As another rewrite option, Ghostscript can also sanitize problematic PDFs.
+
 ## Tests
 
 ```bash
