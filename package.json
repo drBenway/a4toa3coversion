@@ -1,0 +1,31 @@
+{
+  "name": "a4toa3",
+  "version": "0.1.0",
+  "description": "Convert A4 PDFs into imposed A3 booklet PDFs for duplex printing.",
+  "type": "module",
+  "bin": {
+    "a4toa3": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node ./src/cli.js",
+    "test": "node --test",
+    "make-sample": "node ./scripts/make-sample.js"
+  },
+  "keywords": [
+    "pdf",
+    "booklet",
+    "imposition",
+    "printing",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^14.0.1",
+    "pdf-lib": "^1.17.1"
+  }
+}
+
